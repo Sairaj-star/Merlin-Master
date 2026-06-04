@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="StudyMaster AI — Premium AI study coach. Plan smarter, study better, offline.">
+  <title>StudyMaster AI</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar glass" id="sidebar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">◈</div>
+        <div>
+          <h1>StudyMaster</h1>
+          <span class="brand-tag">AI Coach</span>
+        </div>
+      </div>
+      <nav class="nav" id="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">◉</span> Dashboard</button>
+        <button class="nav-item" data-view="subjects"><span class="nav-icon">▤</span> Subjects</button>
+        <button class="nav-item" data-view="planner"><span class="nav-icon">▦</span> Study Plan</button>
+        <button class="nav-item" data-view="calendar"><span class="nav-icon">▧</span> Calendar</button>
+        <button class="nav-item" data-view="focus"><span class="nav-icon">◎</span> Focus Mode</button>
+        <button class="nav-item" data-view="analytics"><span class="nav-icon">◐</span> Analytics</button>
+        <button class="nav-item" data-view="notes"><span class="nav-icon">▣</span> Notes</button>
+        <button class="nav-item" data-view="habits"><span class="nav-icon">◆</span> Habits & Goals</button>
+        <button class="nav-item" data-view="achievements"><span class="nav-icon">★</span> Achievements</button>
+        <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span> Settings</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="streak-badge" id="streak-display">
+          <span class="streak-flame">🔥</span>
+          <span id="streak-count">0</span> day streak
+        </div>
+        <button class="btn-icon theme-toggle" id="theme-toggle" title="Toggle theme (T)" aria-label="Toggle theme">◐</button>
+      </div>
+    </aside>
+
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open menu">☰</button>
+
+    <main class="main">
+      <header class="topbar glass">
+        <div class="search-wrap">
+          <input type="search" id="global-search" placeholder="Search subjects, chapters, tasks, notes… (Ctrl+K)" aria-label="Global search">
+          <div class="search-results glass hidden" id="search-results"></div>
+        </div>
+        <div class="topbar-actions">
+          <div class="productivity-pill" id="productivity-score" title="Productivity score">—</div>
+          <button class="btn btn-ghost" id="btn-focus-quick" title="Focus mode (F)">Focus</button>
+          <button class="btn btn-primary" id="btn-generate-plan">Generate Plan</button>
+        </div>
+      </header>
+
+      <div class="recommendations-bar glass hidden" id="recommendations-bar">
+        <span class="rec-label">AI Coach</span>
+        <ul id="recommendations-list"></ul>
+        <button class="btn-icon" id="dismiss-recs" aria-label="Dismiss">×</button>
+      </div>
+
+      <!-- Dashboard -->
+      <section class="view active" id="view-dashboard" data-view="dashboard">
+        <div class="view-header">
+          <h2>Dashboard</h2>
+          <p class="subtitle" id="motivation-quote">Loading inspiration…</p>
+        </div>
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="rings-grid" id="progress-rings"></div>
+        <div class="dashboard-grid">
+          <div class="card glass">
+            <h3>Exam Readiness</h3>
+            <div class="readiness-display">
+              <div class="readiness-score" id="readiness-score">0</div>
+              <div class="readiness-details" id="readiness-details"></div>
+            </div>
+          </div>
+          <div class="card glass">
+            <h3>Today's Schedule</h3>
+            <ul class="task-list" id="today-tasks"></ul>
+          </div>
+          <div class="card glass">
+            <h3>Study Heatmap</h3>
+            <canvas id="heatmap-canvas" width="280" height="80" aria-label="Study heatmap"></canvas>
+          </div>
+          <div class="card glass burnout-card hidden" id="burnout-card">
+            <h3>Wellness Alert</h3>
+            <p id="burnout-message"></p>
+            <p class="break-rec" id="break-recommendation"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Subjects -->
+      <section class="view" id="view-subjects" data-view="subjects">
+        <div class="view-header flex-between">
+          <div>
+            <h2>Subjects</h2>
+            <p class="subtitle">Manage subjects, chapters, and priorities</p>
+          </div>
+          <button class="btn btn-primary" id="btn-add-subject">+ Add Subject</button>
+        </div>
+        <div class="filter-tabs">
+          <button class="tab active" data-filter="active">Active</button>
+          <button class="tab" data-filter="archived">Archived</button>
+        </div>
+        <div class="subjects-grid" id="subjects-grid"></div>
+      </section>
+
+      <!-- Planner -->
+      <section class="view" id="view-planner" data-view="planner">
+        <div class="view-header flex-between">
+          <div>
+            <h2>Smart Study Plan</h2>
+            <p class="subtitle">AI-optimized schedule based on your goals</p>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-ghost" id="btn-regenerate-plan">Regenerate</button>
+            <button class="btn btn-primary" id="btn-planner-generate">Generate Plan</button>
+          </div>
+        </div>
+        <div class="planner-controls glass">
+          <label>Hours per day <input type="number" id="hours-per-day" min="1" max="16" value="4"></label>
+          <label>Schedule start <input type="date" id="plan-start-date"></label>
+          <label>Weak topics <input type="text" id="weak-topics" placeholder="Comma-separated"></label>
+          <label>Strong topics <input type="text" id="strong-topics" placeholder="Comma-separated"></label>
+        </div>
+        <div class="weekly-plan" id="weekly-plan"></div>
+      </section>
+
+      <!-- Calendar -->
+      <section class="view" id="view-calendar" data-view="calendar">
+        <div class="view-header flex-between">
+          <div>
+            <h2>Calendar</h2>
+            <p class="subtitle">Drag tasks between dates</p>
+          </div>
+          <div class="calendar-nav">
+            <button class="btn-icon" id="cal-prev">‹</button>
+            <span id="cal-month-label"></span>
+            <button class="btn-icon" id="cal-next">›</button>
+          </div>
+        </div>
+        <div class="calendar-legend">
+          <span class="legend study">Study</span>
+          <span class="legend revision">Revision</span>
+          <span class="legend mock">Mock Test</span>
+          <span class="legend exam">Exam</span>
+        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+      </section>
+
+      <!-- Focus -->
+      <section class="view" id="view-focus" data-view="focus">
+        <div class="focus-container" id="focus-container">
+          <div class="focus-stats glass">
+            <div><span id="focus-total">0h</span><small>Total Focus</small></div>
+            <div><span id="focus-longest">0m</span><small>Longest Session</small></div>
+            <div><span id="focus-weekly-avg">0m</span><small>Weekly Avg</small></div>
+          </div>
+          <div class="pomodoro-ring">
+            <svg viewBox="0 0 200 200" class="timer-ring">
+              <circle class="ring-bg" cx="100" cy="100" r="90"/>
+              <circle class="ring-progress" id="pomodoro-ring" cx="100" cy="100" r="90"/>
+            </svg>
+            <div class="timer-display">
+              <span id="timer-label">Focus</span>
+              <span id="timer-time">25:00</span>
+              <span id="timer-session-count">Session 1</span>
+            </div>
+          </div>
+          <div class="pomodoro-controls">
+            <button class="btn btn-ghost" id="btn-timer-settings">Settings</button>
+            <button class="btn btn-primary btn-lg" id="btn-timer-start">Start</button>
+            <button class="btn btn-ghost" id="btn-timer-reset">Reset</button>
+            <button class="btn btn-ghost" id="btn-fullscreen">Fullscreen</button>
+          </div>
+          <select id="focus-subject-select" class="focus-select" aria-label="Subject for focus session"></select>
+        </div>
+      </section>
+
+      <!-- Analytics -->
+      <section class="view" id="view-analytics" data-view="analytics">
+        <div class="view-header">
+          <h2>Study Analytics</h2>
+          <p class="subtitle">Performance insights and trends</p>
+        </div>
+        <div class="charts-grid">
+          <div class="card glass chart-card"><h3>Daily Study Time</h3><canvas id="chart-daily" width="400" height="200"></canvas></div>
+          <div class="card glass chart-card"><h3>Weekly Performance</h3><canvas id="chart-weekly" width="400" height="200"></canvas></div>
+          <div class="card glass chart-card"><h3>Subject Comparison</h3><canvas id="chart-subjects" width="400" height="200"></canvas></div>
+          <div class="card glass chart-card"><h3>Completion Trend</h3><canvas id="chart-completion" width="400" height="200"></canvas></div>
+          <div class="card glass chart-card span-2"><h3>Predicted Readiness Curve</h3><canvas id="chart-readiness" width="800" height="220"></canvas></div>
+        </div>
+        <div class="reports-section">
+          <div class="card glass"><h3>Weekly Report</h3><div id="weekly-report"></div></div>
+          <div class="card glass"><h3>Monthly Report</h3><div id="monthly-report"></div></div>
+        </div>
+      </section>
+
+      <!-- Notes -->
+      <section class="view" id="view-notes" data-view="notes">
+        <div class="view-header flex-between">
+          <div>
+            <h2>Notes</h2>
+            <p class="subtitle">Capture ideas and study insights</p>
+          </div>
+          <button class="btn btn-primary" id="btn-add-note">+ New Note</button>
+        </div>
+        <div class="notes-toolbar">
+          <input type="search" id="notes-search" placeholder="Search notes…">
+          <div class="tag-filters" id="tag-filters"></div>
+        </div>
+        <div class="notes-grid" id="notes-grid"></div>
+      </section>
+
+      <!-- Habits -->
+      <section class="view" id="view-habits" data-view="habits">
+        <div class="view-header flex-between">
+          <div>
+            <h2>Habits & Goals</h2>
+            <p class="subtitle">Build consistency and track milestones</p>
+          </div>
+          <button class="btn btn-primary" id="btn-add-habit">+ Add Habit</button>
+        </div>
+        <div class="habits-goals-grid">
+          <div class="card glass"><h3>Habit Tracker</h3><div id="habits-list"></div></div>
+          <div class="card glass"><h3>Goals</h3><button class="btn btn-ghost btn-sm" id="btn-add-goal">+ Goal</button><div id="goals-list"></div></div>
+        </div>
+      </section>
+
+      <!-- Achievements -->
+      <section class="view" id="view-achievements" data-view="achievements">
+        <div class="view-header">
+          <h2>Achievements</h2>
+          <p class="subtitle">Celebrate your study milestones</p>
+        </div>
+        <div class="streak-showcase glass" id="streak-showcase"></div>
+        <div class="achievements-grid" id="achievements-grid"></div>
+      </section>
+
+      <!-- Settings -->
+      <section class="view" id="view-settings" data-view="settings">
+        <div class="view-header">
+          <h2>Settings</h2>
+          <p class="subtitle">Preferences and data management</p>
+        </div>
+        <div class="settings-grid">
+          <div class="card glass">
+            <h3>Appearance</h3>
+            <label class="setting-row"><span>Theme</span>
+              <select id="setting-theme"><option value="dark">Dark</option><option value="light">Light</option><option value="auto">System</option></select>
+            </label>
+          </div>
+          <div class="card glass">
+            <h3>Pomodoro</h3>
+            <label class="setting-row"><span>Focus (min)</span><input type="number" id="setting-focus-min" min="5" max="90" value="25"></label>
+            <label class="setting-row"><span>Break (min)</span><input type="number" id="setting-break-min" min="1" max="30" value="5"></label>
+            <label class="setting-row"><span>Long break (min)</span><input type="number" id="setting-long-break" min="5" max="60" value="15"></label>
+          </div>
+          <div class="card glass">
+            <h3>Daily Schedule</h3>
+            <div id="daily-schedule-inputs"></div>
+          </div>
+          <div class="card glass">
+            <h3>Data</h3>
+            <div class="btn-group-vertical">
+              <button class="btn btn-ghost" id="btn-manual-save">Save Now</button>
+              <button class="btn btn-ghost" id="btn-export">Export Data</button>
+              <label class="btn btn-ghost file-label">Import Data<input type="file" id="btn-import" accept=".json" hidden></label>
+              <button class="btn btn-danger" id="btn-clear-data">Clear All Data</button>
+            </div>
+            <p class="autosave-status" id="autosave-status">Auto-save enabled</p>
+          </div>
+          <div class="card glass">
+            <h3>Keyboard Shortcuts</h3>
+            <ul class="shortcuts-list">
+              <li><kbd>Ctrl</kbd>+<kbd>K</kbd> Search</li>
+              <li><kbd>T</kbd> Toggle theme</li>
+              <li><kbd>F</kbd> Focus mode</li>
+              <li><kbd>G</kbd> Generate plan</li>
+              <li><kbd>1</kbd>–<kbd>9</kbd> Navigate views</li>
+              <li><kbd>Esc</kbd> Close modals</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal glass" id="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal</h3>
+        <button class="btn-icon modal-close" id="modal-close">×</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+  <div class="achievement-popup hidden" id="achievement-popup">
+    <span class="achievement-icon">★</span>
+    <div>
+      <strong id="achievement-popup-title">Achievement Unlocked!</strong>
+      <p id="achievement-popup-desc"></p>
+    </div>
+  </div>
+
+  <script src="js/db.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/planner.js"></script>
+  <script src="js/recommendations.js"></script>
+  <script src="js/readiness.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/achievements.js"></script>
+  <script src="js/focus.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
